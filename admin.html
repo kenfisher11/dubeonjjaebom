@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>두번째봄 운영</title>
+<link rel="icon" href="/favicon.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root {
+    --bg:#F6F1EA; --panel:#FFFFFF; --ink:#2B1E1A; --muted:#86766C; --line:#E6DBCF; --sunk:#F3ECE4;
+    --wine:#9E2F4B; --wine-soft:#F6E3E7; --gold:#B8925A; --green:#2F6B4F; --green-soft:#E3F0E8;
+    --amber:#8A5A12; --amber-soft:#FBEFD9; --red:#A3262A; --red-soft:#F9E1E1; --side:#1A1210;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); }
+  body { font: 15px/1.55 Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; word-break: keep-all; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  a { color: var(--wine); }
+  .hidden { display: none !important; }
+
+  /* 로그인 */
+  #login { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; }
+  .login-card { width: min(380px, 100%); background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 28px; }
+  .brand { font-weight: 700; letter-spacing: 1px; }
+  .brand small { color: var(--gold); font-weight: 500; margin-left: 6px; letter-spacing: 0; }
+  label.f { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted); margin-top: 14px; }
+  input[type=text], input[type=email], input[type=password], input[type=search], select, textarea {
+    width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: #FCFAF7; font-size: 16px; }  /* 휴대폰에서 칸을 누를 때 화면이 확대되지 않게 */
+  textarea { min-height: 72px; resize: vertical; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--gold); outline-offset: 0; border-color: transparent; }
+  .btn { border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 9px 14px; cursor: pointer; font-weight: 600; font-size: 14px; white-space: nowrap; }
+  .btn:hover { background: var(--sunk); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .btn.primary { background: var(--ink); color: #FAF6F1; border-color: var(--ink); }
+  .btn.primary:hover { background: #3d2b25; }
+  .btn.ok { background: var(--green); color: #fff; border-color: var(--green); }
+  .btn.bad { background: var(--panel); color: var(--red); border-color: #E7B9BB; }
+  .btn.bad:hover { background: var(--red-soft); }
+  .btn.danger { background: var(--red); color: #fff; border-color: var(--red); }
+  .btn.sm { padding: 6px 10px; font-size: 13px; }
+  .err { color: var(--red); font-size: 13px; margin-top: 10px; min-height: 18px; }
+
+  /* 레이아웃 */
+  #app { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+  aside { background: var(--side); color: #E9DCC4; padding: 20px 12px; position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 4px; }
+  aside .brand { color: #E9DCC4; padding: 0 10px 16px; }
+  nav button { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; background: none; border: 0; color: rgba(233,220,196,.78); padding: 10px 12px; border-radius: 10px; cursor: pointer; text-align: left; font-size: 15px; }
+  nav button:hover { background: rgba(255,255,255,.06); color: #fff; }
+  nav button.on { background: rgba(233,220,196,.14); color: #fff; font-weight: 600; }
+  .count { min-width: 22px; padding: 1px 7px; border-radius: 999px; background: var(--wine); color: #fff; font-size: 12px; text-align: center; font-weight: 700; }
+  .count.zero { background: rgba(255,255,255,.1); color: rgba(233,220,196,.5); }
+  aside .me { margin-top: auto; font-size: 12px; color: rgba(233,220,196,.6); padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+  aside .me button { background: none; border: 1px solid rgba(233,220,196,.25); color: rgba(233,220,196,.85); border-radius: 8px; padding: 6px 8px; cursor: pointer; font-size: 12px; }
+  main { padding: 28px 32px 60px; min-width: 0; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 20px; font-size: 14px; }
+  .bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+  .bar .grow { flex: 1; min-width: 180px; }
+
+  /* 카드·표 */
+  .grid { display: grid; gap: 12px; }
+  .stats { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+  .stat .k { font-size: 13px; color: var(--muted); }
+  .stat .v { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stat.todo { cursor: pointer; }
+  .stat.todo.hot { border-color: #E7B9BB; background: #FFF8F8; }
+  .stat.todo.hot .v { color: var(--wine); }
+  .stat.todo.on { outline: 2px solid var(--wine); }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+  .panel + .panel { margin-top: 12px; }
+  h2 { font-size: 16px; margin: 24px 0 10px; }
+  .item { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .list { display: flex; flex-direction: column; gap: 10px; }
+  .row { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+  .who { display: flex; gap: 12px; align-items: center; min-width: 0; }
+  .who .ph { width: 44px; height: 44px; border-radius: 50%; background: var(--sunk); object-fit: cover; flex: none; }
+  .who b { font-size: 16px; }
+  .meta { color: var(--muted); font-size: 13px; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--sunk); color: var(--ink); }
+  .tag.wine { background: var(--wine-soft); color: var(--wine); }
+  .tag.green { background: var(--green-soft); color: var(--green); }
+  .tag.amber { background: var(--amber-soft); color: var(--amber); }
+  .tag.red { background: var(--red-soft); color: var(--red); }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-left: auto; }
+  .empty { padding: 40px 16px; text-align: center; color: var(--muted); background: var(--panel); border: 1px dashed var(--line); border-radius: 14px; }
+  table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 14px; vertical-align: middle; }
+  th { background: var(--sunk); font-size: 12px; color: var(--muted); font-weight: 600; }
+  tr.click { cursor: pointer; } tr.click:hover td { background: #FCFAF7; }
+  .tbl { overflow-x: auto; }
+
+  .photos { display: flex; gap: 8px; flex-wrap: wrap; }
+  .photo { position: relative; width: 132px; }
+  .photo img { width: 132px; height: 176px; object-fit: cover; border-radius: 10px; background: var(--sunk); display: block; cursor: zoom-in; }
+  .photo .pb { display: flex; gap: 4px; margin-top: 6px; }
+  .photo .pb .btn { flex: 1; padding: 5px 0; }
+  .photo .pos { position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,.55); color: #fff; font-size: 11px; padding: 1px 6px; border-radius: 6px; }
+
+  /* 대화 근거 */
+  .chat { background: var(--sunk); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+  .bubble { max-width: 80%; padding: 7px 11px; border-radius: 12px; background: #fff; font-size: 14px; white-space: pre-wrap; }
+  .bubble.mine { align-self: flex-start; border: 1px solid #E7B9BB; }
+  .bubble.other { align-self: flex-end; background: #fff; color: var(--muted); }
+  .bubble.hit { background: var(--red-soft); border-color: var(--red); }
+  .bubble .t { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .signal { border-left: 3px solid var(--line); padding-left: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .signal.ai { border-color: var(--amber); } .signal.report { border-color: var(--wine); } .signal.review { border-color: var(--gold); }
+  .quote { background: var(--sunk); border-radius: 10px; padding: 10px 12px; white-space: pre-wrap; font-size: 14px; }
+
+  /* 상세 서랍 */
+  .drawer-bg { position: fixed; inset: 0; background: rgba(26,18,16,.35); z-index: 20; }
+  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(720px, 100%); background: var(--bg); z-index: 21; overflow-y: auto; padding: 24px; box-shadow: -10px 0 40px rgba(0,0,0,.15); }
+  .drawer .close { position: sticky; top: 0; float: right; }
+  .kv { display: grid; grid-template-columns: 110px 1fr; gap: 6px 12px; font-size: 14px; }
+  .kv dt { color: var(--muted); } .kv dd { margin: 0; }
+  .decide { display: grid; gap: 10px; }
+  .seg { display: flex; flex-wrap: wrap; gap: 6px; }
+  .seg button { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 7px 12px; cursor: pointer; font-size: 14px; }
+  .seg button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .seg button.on.danger { background: var(--red); border-color: var(--red); }
+  .hint { font-size: 12px; color: var(--muted); }
+  .presets { display: flex; gap: 6px; flex-wrap: wrap; }
+  .presets button { border: 1px dashed var(--line); background: none; border-radius: 8px; padding: 4px 8px; font-size: 12px; cursor: pointer; color: var(--muted); }
+  .presets button:hover { color: var(--ink); border-color: var(--gold); }
+
+  /* 가입 추이 */
+  .spark { display: flex; align-items: flex-end; gap: 4px; height: 90px; }
+  .spark div { flex: 1; background: var(--gold); border-radius: 4px 4px 0 0; min-height: 2px; position: relative; }
+  .spark div:hover::after { content: attr(data-t); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+  .spark-x { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; margin-top: 4px; }
+
+  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 10px; z-index: 40; font-size: 14px; max-width: calc(100% - 32px); }
+  #toast.bad { background: var(--red); }
+  #viewer { position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 30; display: grid; place-items: center; padding: 16px; cursor: zoom-out; }
+  #viewer img, #viewer iframe { max-width: 100%; max-height: 92vh; border-radius: 8px; background: #fff; }
+  #viewer iframe { width: min(900px, 100%); height: 92vh; border: 0; }
+  #viewer .vnote { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 13px; background: rgba(0,0,0,.5); padding: 4px 10px; border-radius: 8px; }
+
+  @media (max-width: 860px) {
+    #app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; align-content: start; }  /* 휴대폰: 위 메뉴 띠가 늘어나지 않게 */
+    aside { position: sticky; height: auto; z-index: 10; padding: 10px 12px; flex-direction: row; align-items: center; overflow-x: auto; }
+    aside .brand { padding: 0 8px 0 0; white-space: nowrap; }
+    nav { display: flex; gap: 4px; }
+    nav button { width: auto; white-space: nowrap; padding: 8px 10px; }
+    aside .me { margin: 0 0 0 auto; padding: 0; flex-direction: row; }
+    aside .me span { display: none; }
+    main { padding: 20px 16px 60px; }
+    .kv { grid-template-columns: 90px 1fr; }
+    .drawer { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<section id="login" class="hidden">
+  <form class="login-card" id="loginForm">
+    <div class="brand">두번째봄 <small>운영</small></div>
+    <p class="meta" style="margin:6px 0 0">운영자 계정으로만 들어올 수 있어요.</p>
+    <label class="f">이메일<input type="email" id="email" autocomplete="username" required></label>
+    <label class="f">비밀번호<input type="password" id="pw" autocomplete="current-password" required></label>
+    <button class="btn primary" style="width:100%;margin-top:18px;padding:12px" id="loginBtn">들어가기</button>
+    <div class="err" id="loginErr"></div>
+  </form>
+</section>
+
+<div id="app" class="hidden">
+  <aside>
+    <div class="brand">두번째봄 <small>운영</small></div>
+    <nav id="nav"></nav>
+    <div class="me"><span id="meName"></span><button id="pwBtn">비밀번호 바꾸기</button><button id="outBtn">나가기</button></div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<div id="drawerBg" class="drawer-bg hidden"></div>
+<div id="drawer" class="drawer hidden"></div>
+<div id="viewer" class="hidden"></div>
+<div id="toast" class="hidden"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL = 'https://qkuwyenlyvzyyfaybyec.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_WVU3NyHcfenbmL1cGYHMzA_nZG7mJSK';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, storageKey: 'dbb-admin' } });
+
+// ── 표시용 문구 ─────────────────────────────────────────────
+const L = {
+  kind: { identity: '본인인증', photo: '실물 사진', marital: '혼인관계', job: '직업', income: '소득', home: '자가' },
+  status: { onboarding: '가입 중', pending_review: '검수 대기', active: '활동 중', suspended: '정지', banned: '영구 정지', withdrawn: '탈퇴' },
+  statusTag: { onboarding: '', pending_review: 'amber', active: 'green', suspended: 'red', banned: 'red', withdrawn: '' },
+  case: { pending: '새 건', reviewing: '검토 중', no_issue: '문제 없음', warned: '경고', suspended: '정지', banned: '영구 정지' },
+  caseTag: { pending: 'wine', reviewing: 'amber', no_issue: 'green', warned: 'amber', suspended: 'red', banned: 'red' },
+  source: { ai: 'AI 탐지', report: '신고', review: '만남 후기' },
+  action: { no_issue: '문제 없음', warn: '경고', suspend: '정지', ban: '영구 정지', restore: '복구' },
+  report: { money_request: '돈 요구', married_suspected: '기혼 의심', photo_mismatch: '사진과 다름', harassment: '괴롭힘·불쾌한 말', other: '기타' },
+  issue: { no_show: '약속에 안 나옴', photo_mismatch: '사진과 다름', money_talk: '돈 얘기', harassment: '불쾌한 언행', none: '없음' },
+  want: { yes: '또 보고 싶음', no: '아니요', unsure: '잘 모르겠음' },
+  review: { pending: '대기', approved: '승인', rejected: '반려', expired: '만료' },
+  gender: { M: '남', F: '여' },
+  marital: { never_married: '미혼', divorced: '이혼', widowed: '사별' },
+};
+const REJECT_PRESETS = {
+  marital: ['서류 글자가 흐려 읽을 수 없어요. 밝은 곳에서 다시 찍어 주세요.', '발급일이 3개월이 지났어요. 최근 서류로 다시 올려 주세요.', '본인 이름이 보이지 않아요. 전체 화면이 나오게 다시 올려 주세요.'],
+  job: ['재직이나 사업을 확인할 수 있는 서류가 아니에요. 재직증명서나 사업자등록증을 올려 주세요.', '서류 글자가 흐려 읽을 수 없어요.'],
+  income: ['금액을 확인할 수 있는 서류가 아니에요. 소득금액증명원을 올려 주세요.', '서류 글자가 흐려 읽을 수 없어요.'],
+  home: ['본인 소유를 확인할 수 없어요. 등기부등본(소유자 표시 포함)을 올려 주세요.', '서류 글자가 흐려 읽을 수 없어요.'],
+  photo: ['셀카와 프로필 사진이 같은 분인지 확인되지 않았어요. 정면 셀카를 다시 찍어 주세요.'],
+  identity: ['본인인증 정보가 맞지 않아요. 다시 인증해 주세요.'],
+};
+const INCOME_BANDS = ['5천만 원 이상', '7천만 원 이상', '1억 이상', '2억 이상'];
+const NOTICE_PRESETS = {
+  warn: ['대화 중 투자·송금 이야기는 운영 정책상 할 수 없어요. 반복되면 이용이 제한돼요.', '상대방이 불편해하는 표현이 확인됐어요. 서로 존중하는 대화를 부탁드려요.'],
+  suspend: ['대화에서 금전 요구가 확인되어 30일 동안 이용을 멈췄어요.', '여러 회원의 신고가 확인되어 조사하는 동안 이용을 멈췄어요.'],
+  ban: ['투자 권유와 송금 요구가 반복 확인되어 이용을 영구히 제한했어요.', '기혼 사실이 확인되어 이용을 영구히 제한했어요.'],
+};
+const ERR = {
+  ADMIN_ONLY: '운영자 계정이 아니에요.', NOT_PENDING: '이미 처리된 건이에요. 목록을 새로 고쳐 주세요.',
+  REASON_REQUIRED: '사유를 적어 주세요.', NOTICE_REQUIRED: '회원에게 보낼 사유를 적어 주세요.',
+  NO_DOCUMENT: '서류 파일이 없어요 (이미 처리되었거나 회원이 올리지 않음).', NOT_FOUND: '찾을 수 없어요.',
+  'Invalid login credentials': '이메일이나 비밀번호가 맞지 않아요.',
+};
+
+// ── 도우미 ─────────────────────────────────────────────────
+const $ = (s) => document.querySelector(s);
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmt = (d, withTime = true) => {
+  if (!d) return '-';
+  const t = new Date(d);
+  const s = t.toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric' });
+  return withTime ? s + ' ' + t.toLocaleTimeString('ko-KR', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false }) : s;
+};
+const ago = (d) => {
+  const m = Math.round((Date.now() - new Date(d)) / 60000);
+  if (m < 1) return '방금'; if (m < 60) return `${m}분 전`; if (m < 1440) return `${Math.round(m / 60)}시간 전`;
+  return `${Math.round(m / 1440)}일 전`;
+};
+const tag = (text, cls = '') => `<span class="tag ${cls}">${esc(text)}</span>`;
+function msg(e) {
+  const m = (e && (e.message || e.error_description || e.error)) || String(e);
+  for (const k of Object.keys(ERR)) if (m.includes(k)) return ERR[k];
+  return m;
+}
+function toast(text, bad = false) {
+  const t = $('#toast'); t.textContent = text; t.className = bad ? 'bad' : ''; clearTimeout(toast.h);
+  toast.h = setTimeout(() => t.className = 'hidden', 3200);
+}
+async function rpc(fn, args = {}) {
+  const { data, error } = await sb.rpc(fn, args);
+  if (error) throw error;
+  return data;
+}
+async function run(btn, fn) {
+  if (btn) btn.disabled = true;
+  try { await fn(); } catch (e) { toast(msg(e), true); } finally { if (btn) btn.disabled = false; }
+}
+// 비공개 사진은 짧은 서명 주소로만 봄 (10분)
+const urlCache = new Map();
+async function signPhotos(paths) {
+  const need = [...new Set(paths.filter((p) => p && !urlCache.has(p)))];
+  if (need.length) {
+    const { data } = await sb.storage.from('profile-photos').createSignedUrls(need, 600);
+    (data || []).forEach((d) => d.signedUrl && urlCache.set(d.path, d.signedUrl));
+  }
+  return (p) => urlCache.get(p) || '';
+}
+function who(u, extra = '') {
+  if (!u) return '<span class="meta">(탈퇴한 회원)</span>';
+  return `<div class="who">${u.photo ? `<img class="ph" data-path="${esc(u.photo)}" alt="">` : '<div class="ph"></div>'}
+    <div><b>${esc(u.real_name)}</b> <span class="meta">${esc(u.display_name)} · ${esc(L.gender[u.gender] || '')} ${esc(u.age)}세 · ${esc(u.region)}</span>
+    <div class="meta">${tag(L.status[u.status] || u.status, L.statusTag[u.status])} 가입 ${fmt(u.created_at, false)} · 최근 ${ago(u.last_active_at)} ${extra}</div></div></div>`;
+}
+async function hydratePhotos(root) {
+  const imgs = [...root.querySelectorAll('img[data-path]')];
+  if (!imgs.length) return;
+  const get = await signPhotos(imgs.map((i) => i.dataset.path));
+  imgs.forEach((i) => { i.src = get(i.dataset.path); });
+}
+function openViewer(src, isPdf, note) {
+  const v = $('#viewer');
+  v.innerHTML = (note ? `<div class="vnote">${esc(note)}</div>` : '') + (isPdf ? `<iframe src="${esc(src)}"></iframe>` : `<img src="${esc(src)}" alt="">`);
+  v.classList.remove('hidden');
+}
+$('#viewer').onclick = () => { $('#viewer').classList.add('hidden'); $('#viewer').innerHTML = ''; };
+document.addEventListener('click', (e) => {
+  const img = e.target.closest('.photo img, .who img.ph');
+  if (img && img.src) openViewer(img.src, false);
+});
+function openDrawer(html) {
+  $('#drawer').innerHTML = `<button class="btn sm close" id="dClose">닫기</button>` + html;
+  $('#drawer').classList.remove('hidden'); $('#drawerBg').classList.remove('hidden');
+  $('#drawer').scrollTop = 0;
+  $('#dClose').onclick = closeDrawer;
+  hydratePhotos($('#drawer'));
+}
+function closeDrawer() { $('#drawer').classList.add('hidden'); $('#drawerBg').classList.add('hidden'); }
+$('#drawerBg').onclick = closeDrawer;
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeDrawer(); $('#viewer').classList.add('hidden'); } });
+
+// 문의 답변 틀 (눌러서 넣고, 회원 상황에 맞게 고쳐서 보내요)
+const SUPPORT_PRESETS = {
+  common: ['안녕하세요, 두번째봄입니다. 알려 주셔서 고맙습니다. 확인해 보고 오늘 안에 다시 말씀드릴게요.'],
+  account: ['안녕하세요, 두번째봄입니다. 휴대폰 번호가 바뀌셨다면 새 번호로 본인인증을 한 번 더 해 주세요. 이전 정보는 그대로 이어서 쓸 수 있게 도와드릴게요.'],
+  region: ['안녕하세요, 두번째봄입니다. 말씀하신 지역으로 바꿔 드렸어요. 앱을 다시 열면 새 동네 이웃방과 추천이 보여요.',
+    '안녕하세요, 두번째봄입니다. 말씀하신 지역은 아직 열리지 않았어요. 열리면 가장 먼저 알림으로 알려 드릴게요.'],
+  pay: ['안녕하세요, 두번째봄입니다. 결제 내역을 확인해 보니 편지권이 늦게 반영됐어요. 지금 넣어 드렸으니 앱을 다시 열어 확인해 주세요.',
+    '안녕하세요, 두번째봄입니다. 환불은 앱스토어·플레이스토어에서 신청하실 수 있어요. 결제한 지 7일 안이고 쓰지 않으셨다면 전액 돌려받으실 수 있어요.'],
+  safety: ['안녕하세요, 두번째봄입니다. 알려 주셔서 정말 고맙습니다. 해당 회원의 글과 대화를 운영자가 직접 확인했고, 규칙에 따라 조치했어요. 돈 이야기를 꺼내는 분은 응하지 마시고 바로 신고해 주세요.',
+    '안녕하세요, 두번째봄입니다. 지금 확인 중이에요. 그동안 그 회원과는 연락하지 마시고, 대화 화면 오른쪽 위 메뉴에서 차단해 두시면 서로 보이지 않아요.'],
+  bug: ['안녕하세요, 두번째봄입니다. 불편을 드려 죄송해요. 같은 문제가 생기지 않게 고치고 있어요. 앱을 최신 버전으로 업데이트한 뒤 다시 해 봐 주세요.'],
+  idea: ['안녕하세요, 두번째봄입니다. 좋은 생각 나눠 주셔서 고맙습니다. 다음 업데이트 때 꼭 검토해 볼게요.'],
+};
+
+// ── 화면 ───────────────────────────────────────────────────
+const VIEWS = [
+  { key: 'home', label: '오늘', todo: null },
+  { key: 'docs', label: '실물 확인 검수', todo: 'verifications' },
+  { key: 'photos', label: '사진 검수', todo: 'photos' },
+  { key: 'cases', label: '검토 건', todo: 'cases' },
+  { key: 'appeals', label: '이의신청', todo: 'appeals' },
+  { key: 'safety', label: '안심 귀가', todo: 'safety' },
+  { key: 'members', label: '회원 찾기', todo: null },
+  { key: 'rooms', label: '수다방', todo: 'rooms' },
+  { key: 'support', label: '문의', todo: 'support' },
+  { key: 'perks', label: '혜택', todo: null },
+  { key: 'prereg', label: '출시 알림 신청', todo: null },
+];
+// 수다방 신고·의심 수 (admin_overview 에 없어서 따로 셈)
+async function roomTodo() {
+  try { const r = await rpc('admin_rooms_overview'); return r.reduce((a, x) => a + (x.flagged || 0), 0); } catch (e) { return 0; }
+}
+let current = 'home', overview = null;
+
+function renderNav() {
+  const todo = overview?.todo || {};
+  $('#nav').innerHTML = VIEWS.map((v) => {
+    const n = v.todo ? (todo[v.todo] || 0) : null;
+    return `<button data-v="${v.key}" class="${v.key === current ? 'on' : ''}">${v.label}${n === null ? '' : `<span class="count ${n ? '' : 'zero'}">${n}</span>`}</button>`;
+  }).join('');
+  $('#nav').querySelectorAll('button').forEach((b) => b.onclick = () => go(b.dataset.v));
+}
+async function refreshCounts() {
+  try { overview = await rpc('admin_overview'); overview.todo.rooms = await roomTodo();
+    try { overview.todo.support = (await rpc('admin_support', { p_only: 'open', p_limit: 500 })).length; } catch (e) { overview.todo.support = 0; } renderNav(); } catch (e) { /* 무시 */ }
+}
+async function go(view) {
+  current = view; renderNav(); closeDrawer();
+  try { history.replaceState(null, '', '#' + view); } catch {}
+  const main = $('#main');
+  main.innerHTML = '<p class="meta">불러오는 중…</p>';
+  try { await PAGES[view](main); hydratePhotos(main); }
+  catch (e) { main.innerHTML = `<div class="empty">${esc(msg(e))}</div>`; }
+}
+
+const PAGES = {
+  // 오늘
+  async home(main) {
+    overview = await rpc('admin_overview'); overview.todo.rooms = await roomTodo(); renderNav();
+    const o = overview, t = o.todo, d = o.today, m = o.members || {}, g = o.gender || {};
+    const max = Math.max(1, ...o.signups_14d.map((x) => x.n));
+    const todoCard = (k, label, view, note) => `<div class="stat todo ${t[k] ? 'hot' : ''}" data-go="${view}"><div class="k">${label}</div><div class="v">${t[k]}</div><div class="meta">${note}</div></div>`;
+    main.innerHTML = `
+      <h1>오늘</h1><p class="sub">${new Date().toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', month: 'long', day: 'numeric', weekday: 'long' })} · 처리할 일부터 보여 드려요</p>
+      <div class="grid stats">
+        ${todoCard('verifications', '실물 확인 검수', 'docs', '셀카 대조 점수가 낮은 회원')}
+        ${todoCard('photos', '사진 검수', 'photos', '프로필 사진')}
+        ${todoCard('cases', '검토 건', 'cases', 'AI 탐지·신고·후기')}
+        ${todoCard('appeals', '이의신청', 'appeals', '조치에 대한 이의')}
+        ${todoCard('safety', '안심 귀가 알림', 'safety', '최근 24시간 보호자 문자')}
+        ${todoCard('rooms', '수다방 신고·의심', 'rooms', '사기 의심 문구 · 가리지 않은 글')}
+      </div>
+      <h2>오늘 활동</h2>
+      <div class="grid stats">
+        <div class="stat"><div class="k">새 가입</div><div class="v">${d.signups}</div></div>
+        <div class="stat"><div class="k">들어온 회원</div><div class="v">${d.active}</div></div>
+        <div class="stat"><div class="k">출석 꽃</div><div class="v">${d.checkins}</div></div>
+        <div class="stat"><div class="k">보낸 편지</div><div class="v">${d.letters}</div></div>
+        <div class="stat"><div class="k">새 인연(매칭)</div><div class="v">${d.matches}</div></div>
+        <div class="stat"><div class="k">대화 메시지</div><div class="v">${d.messages}</div></div>
+      </div>
+      <h2>회원</h2>
+      <div class="grid stats">
+        <div class="stat"><div class="k">활동 중</div><div class="v">${m.active || 0}</div><div class="meta">남 ${g.M || 0} · 여 ${g.F || 0}</div></div>
+        <div class="stat"><div class="k">검수 대기</div><div class="v">${m.pending_review || 0}</div></div>
+        <div class="stat"><div class="k">가입 중</div><div class="v">${m.onboarding || 0}</div></div>
+        <div class="stat"><div class="k">정지 · 영구 정지</div><div class="v">${(m.suspended || 0) + (m.banned || 0)}</div></div>
+      </div>
+      <h2>최근 14일 가입</h2>
+      <div class="panel"><div class="spark">${o.signups_14d.map((x) => `<div style="height:${Math.max(2, x.n / max * 100)}%" data-t="${fmt(x.day, false)} ${x.n}명"></div>`).join('')}</div>
+        <div class="spark-x"><span>${fmt(o.signups_14d[0].day, false)}</span><span>오늘</span></div></div>`;
+    main.querySelectorAll('[data-go]').forEach((el) => el.onclick = () => go(el.dataset.go));
+  },
+
+  // 서류 검수
+  async docs(main) {
+    const list = await rpc('admin_verification_queue');
+    main.innerHTML = `<h1>실물 확인 검수</h1><p class="sub">셀카 대조 점수가 낮아 사람이 한 번 더 봐야 하는 회원이에요. 서류는 받지 않아요.</p>
+      <div class="list">${list.length ? list.map(docItem).join('') : '<div class="empty">기다리는 확인 건이 없어요.</div>'}</div>`;
+    list.forEach((v) => bindDoc(main, v));
+  },
+
+  // 사진 검수
+  async photos(main) {
+    const list = await rpc('admin_photo_queue');
+    main.innerHTML = `<h1>사진 검수</h1><p class="sub">본인 얼굴이 잘 보이는지, 다른 사람·연예인·보정이 심한 사진은 아닌지 봐 주세요. 사진을 누르면 크게 보여요.</p>
+      <div class="list">${list.length ? list.map((g) => `
+        <div class="item" data-user="${esc(g.user?.id)}">
+          <div class="row">${who(g.user)}<div class="actions">${g.match_score != null ? tag('셀카 대조 ' + Math.round(g.match_score * 100) + '%', g.match_score >= 0.9 ? 'green' : 'amber') : tag('셀카 대조 전', '')}
+            <button class="btn sm ok" data-all="1">모두 승인</button></div></div>
+          <div class="photos">${g.photos.map((p) => `<div class="photo" data-id="${esc(p.id)}"><span class="pos">${p.position === 8 ? '그 시절' : p.position + 1}</span>
+            <img data-path="${esc(p.path)}" alt="">
+            <div class="pb"><button class="btn sm ok" data-ok="1">승인</button><button class="btn sm bad" data-ok="0">반려</button></div></div>`).join('')}</div>
+        </div>`).join('') : '<div class="empty">기다리는 사진이 없어요.</div>'}</div>`;
+    main.querySelectorAll('.photo .pb button').forEach((b) => b.onclick = () => run(b, async () => {
+      const box = b.closest('.photo'); await rpc('admin_review_photo', { p_photo: box.dataset.id, p_approve: b.dataset.ok === '1' });
+      box.style.opacity = .35; box.querySelectorAll('button').forEach((x) => x.disabled = true);
+      box.querySelector('.pb').insertAdjacentHTML('afterend', `<div class="meta">${b.dataset.ok === '1' ? '승인함' : '반려함'}</div>`);
+      refreshCounts();
+    }));
+    main.querySelectorAll('[data-all]').forEach((b) => b.onclick = () => run(b, async () => {
+      const item = b.closest('.item');
+      for (const box of item.querySelectorAll('.photo')) {
+        if (box.style.opacity) continue;
+        await rpc('admin_review_photo', { p_photo: box.dataset.id, p_approve: true }); box.style.opacity = .35;
+      }
+      item.querySelectorAll('button').forEach((x) => x.disabled = true); toast('사진을 모두 승인했어요'); refreshCounts();
+    }));
+  },
+
+  // 검토 건
+  async cases(main, filter = 'open') {
+    const list = await rpc('admin_cases', { p_filter: filter });
+    main.innerHTML = `<h1>검토 건</h1><p class="sub">AI 탐지·신고·만남 후기가 회원별로 한 건에 모여요. AI는 건을 여는 데까지만 하고, 정지는 운영자 판단으로만 걸려요.</p>
+      <div class="bar"><div class="seg" id="cf">${[['open', '열린 건'], ['closed', '끝난 건'], ['all', '전체']].map(([k, l]) => `<button data-f="${k}" class="${k === filter ? 'on' : ''}">${l}</button>`).join('')}</div></div>
+      ${list.length ? `<div class="tbl"><table><thead><tr><th>회원</th><th>상태</th><th>근거</th><th>마지막 근거</th><th>최근</th></tr></thead><tbody>
+      ${list.map((c) => `<tr class="click" data-id="${esc(c.id)}"><td>${esc(c.target?.real_name)} <span class="meta">${esc(L.gender[c.target?.gender] || '')} ${esc(c.target?.age)} · ${esc(c.target?.region)}</span>${c.past_cases ? ' ' + tag('이전 ' + c.past_cases + '건', 'amber') : ''}</td>
+        <td>${tag(L.case[c.status], L.caseTag[c.status])}</td><td>${c.sources.map((s) => tag(L.source[s])).join(' ')} <span class="meta">${c.signals}개</span></td>
+        <td>${esc(c.last_reason)}</td><td class="meta">${ago(c.updated_at)}</td></tr>`).join('')}</tbody></table></div>` : `<div class="empty">${filter === 'open' ? '열린 검토 건이 없어요.' : '건이 없어요.'}</div>`}`;
+    main.querySelectorAll('#cf button').forEach((b) => b.onclick = () => PAGES.cases(main, b.dataset.f));
+    main.querySelectorAll('tr[data-id]').forEach((tr) => tr.onclick = () => openCase(tr.dataset.id));
+  },
+
+  // 이의신청
+  async appeals(main) {
+    const list = await rpc('admin_appeals');
+    main.innerHTML = `<h1>이의신청</h1><p class="sub">받아들이면 조치가 풀리고 회원에게 알림이 가요. 유지하면 적은 이유가 회원에게 전달돼요.</p>
+      <div class="list">${list.length ? list.map((a) => `
+        <div class="item" data-id="${esc(a.id)}">
+          <div class="row">${who(a.user)}<div class="actions"><button class="btn sm" data-case="${esc(a.case_id)}">검토 건 보기</button></div></div>
+          <div class="kv"><dt>내린 조치</dt><dd>${tag(L.action[a.action], 'red')} <span class="meta">${fmt(a.acted_at)}</span></dd>
+            <dt>회원에게 보낸 사유</dt><dd>${esc(a.user_notice)}</dd><dt>내부 메모</dt><dd>${esc(a.note)}</dd></div>
+          <div><div class="meta">회원의 이의신청 · ${fmt(a.created_at)}</div><div class="quote">${esc(a.body)}</div></div>
+          <div class="decide"><textarea placeholder="판단 이유 (유지할 때는 회원에게 그대로 전달돼요)"></textarea>
+            <div class="row"><button class="btn ok" data-acc="1">받아들이고 조치 해제</button><button class="btn bad" data-acc="0">조치 유지</button></div></div>
+        </div>`).join('') : '<div class="empty">기다리는 이의신청이 없어요.</div>'}</div>`;
+    main.querySelectorAll('[data-case]').forEach((b) => b.onclick = () => openCase(b.dataset.case));
+    main.querySelectorAll('[data-acc]').forEach((b) => b.onclick = () => run(b, async () => {
+      const item = b.closest('.item'); const note = item.querySelector('textarea').value.trim();
+      if (note.length < 2) throw new Error('REASON_REQUIRED');
+      await rpc('admin_decide_appeal', { p_appeal: item.dataset.id, p_accept: b.dataset.acc === '1', p_note: note });
+      item.remove(); toast(b.dataset.acc === '1' ? '조치를 해제했어요' : '조치를 유지했어요'); refreshCounts();
+    }));
+  },
+
+  // 안심 귀가
+  async safety(main) {
+    const list = await rpc('admin_safety_alerts');
+    main.innerHTML = `<h1>안심 귀가</h1><p class="sub">만남 뒤 귀가 확인이 없어 보호자에게 문자가 간 약속이에요 (최근 7일). 필요하면 회원에게 직접 연락해 주세요.</p>
+      ${list.length ? `<div class="tbl"><table><thead><tr><th>회원</th><th>만난 사람</th><th>약속</th><th>장소</th><th>보호자 알림</th><th>지금</th></tr></thead><tbody>
+      ${list.map((s) => `<tr><td>${esc(s.user?.real_name)} <span class="meta">${esc(s.user?.age)}세</span></td><td>${esc(s.partner?.real_name)} <span class="meta">${esc(s.partner?.age)}세</span></td>
+        <td>${fmt(s.meet_at)}</td><td>${esc(s.place)}</td><td>${fmt(s.alerted_at)}</td>
+        <td>${s.status === 'home_safe' ? tag('귀가 확인', 'green') : s.status === 'alerted' ? tag('확인 없음', 'red') : tag(s.status)}</td></tr>`).join('')}</tbody></table></div>`
+      : '<div class="empty">보호자에게 알림이 간 약속이 없어요.</div>'}`;
+  },
+
+  // 수다방: 방별 현황 + 글 흐름 (가리기·되살리기)
+  async rooms(main, room = null, only = 'flagged') {
+    const [ov, feed, notice] = await Promise.all([rpc('admin_rooms_overview'), rpc('admin_room_feed', { p_room: room, p_only: only, p_limit: 200 }),
+      room ? rpc('room_notice', { p_room: room }).catch(() => null) : Promise.resolve(null)]);
+    const tabs = [['flagged', '신고 · 의심'], ['all', '전체'], ['hidden', '가린 글']];
+    main.innerHTML = `<h1>수다방</h1><p class="sub">돈·외부 연락처 표현은 자동 표시돼요. 신고 3건이면 자동으로 가려지고, 여기서 다시 보이게 하거나 가릴 수 있어요. 가리기만으로 회원이 정지되지는 않아요 — 필요하면 회원을 눌러 검토 건을 여세요.</p>
+      <div class="grid stats">${ov.map((r) => `<div class="stat todo ${r.flagged ? 'hot' : ''} ${room === r.id ? 'on' : ''}" data-room="${r.id}"><div class="k">${esc(r.emoji)} ${esc(r.title)}${r.active ? '' : ' (닫힘)'}</div>
+        <div class="v">${r.members}</div><div class="meta">회원 · 24시간 글 ${r.today} · 의심 ${r.flagged} · 가림 ${r.hidden}</div></div>`).join('')}</div>
+      <div class="bar">${tabs.map(([k, l]) => `<button class="btn sm ${k === only ? 'primary' : ''}" data-only="${k}">${l}</button>`).join('')}
+        ${room ? `<button class="btn sm" data-room="">모든 방 보기</button>` : ''}</div>
+      ${room ? `<div class="panel decide" style="margin:12px 0"><b>이 방 맨 위 운영자 공지</b> <span class="meta">회원 모두에게 방 위쪽에 고정돼 보여요 · 300자 · 비우고 저장하면 내려가요</span>
+        <textarea id="rnText" rows="3" style="width:100%;box-sizing:border-box" maxlength="300" placeholder="예: 반갑습니다, 두번째봄 운영자예요. 돈 이야기나 카톡 ID를 묻는 분은 바로 신고해 주세요.">${notice ? esc(notice.text) : ''}</textarea>
+        <div class="row"><button class="btn sm primary" id="rnGo">공지 저장</button></div></div>` : '<p class="meta">방을 누르면 그 방의 운영자 공지를 쓸 수 있어요.</p>'}
+      ${feed.length ? `<div class="tbl"><table><thead><tr><th>시각</th><th>방</th><th>쓴 사람</th><th>내용</th><th>표시</th><th></th></tr></thead><tbody>
+      ${feed.map((m) => `<tr data-id="${m.id}"><td class="meta">${fmt(m.created_at)}</td><td>${esc(m.emoji)} ${esc(m.room)}</td>
+        <td class="click" data-user="${esc(m.user_id)}"><b>${esc(m.name)}</b> <span class="meta">${esc(m.real_name)}</span></td>
+        <td style="max-width:420px">${m.kind === 'sticker' ? tag('이모티콘') + ' ' + esc(m.body) : esc(m.body)}</td>
+        <td>${m.flagged ? tag('사기 의심', 'red') : ''} ${m.reports ? tag('신고 ' + m.reports, 'red') : ''} ${m.hidden ? tag('가림') : ''} ${m.deleted ? tag('본인 삭제') : ''}</td>
+        <td>${m.deleted ? '' : `<button class="btn sm" data-hide="${m.hidden ? 0 : 1}">${m.hidden ? '되살리기' : '가리기'}</button>`}</td></tr>`).join('')}</tbody></table></div>`
+      : `<div class="empty">${only === 'flagged' ? '처리할 신고·의심 글이 없어요.' : '글이 없어요.'}</div>`}`;
+    main.querySelectorAll('[data-room]').forEach((el) => el.onclick = () => PAGES.rooms(main, el.dataset.room ? +el.dataset.room : null, only));
+    if (room) $('#rnGo').onclick = () => run($('#rnGo'), async () => {
+      await rpc('admin_set_room_notice', { p_room: room, p_text: $('#rnText').value });
+      toast($('#rnText').value.trim() ? '공지를 올렸어요.' : '공지를 내렸어요.');
+    });
+    main.querySelectorAll('[data-only]').forEach((el) => el.onclick = () => PAGES.rooms(main, room, el.dataset.only));
+    main.querySelectorAll('[data-user]').forEach((el) => el.onclick = () => openMember(el.dataset.user));
+    main.querySelectorAll('[data-hide]').forEach((b) => b.onclick = () => run(b, async () => {
+      const id = +b.closest('tr').dataset.id, hide = b.dataset.hide === '1';
+      await rpc('admin_hide_room_message', { p_message: id, p_hide: hide });
+      toast(hide ? '글을 가렸어요.' : '글을 다시 보이게 했어요.'); await PAGES.rooms(main, room, only); refreshCounts();
+    }));
+  },
+
+  // 1:1 문의 (앱 → 내 정보 → 문의하기). 답하면 회원에게 앱 알림이 가요.
+  async support(main, only = 'open') {
+    const list = await rpc('admin_support', { p_only: only, p_limit: 300 });
+    const C = { account: '가입·로그인', region: '지역 변경', pay: '결제·편지권', safety: '안전·신고', bug: '오류', idea: '제안', other: '기타' };
+    const tabs = [['open', '답변 대기'], ['answered', '답변 완료'], ['all', '전체']];
+    main.innerHTML = `<h1>문의</h1><p class="sub">회원이 앱에서 보낸 문의예요. 답을 쓰면 회원에게 앱 알림이 가요. 약관에 '신고는 24시간 안에 확인'이라고 약속했으니 안전·신고 문의를 먼저 봐 주세요.</p>
+      <div class="bar">${tabs.map(([k, l]) => `<button class="btn sm ${k === only ? 'primary' : ''}" data-only="${k}">${l}</button>`).join('')}</div>
+      ${list.length ? list.map((t) => `<div class="card" data-id="${t.id}" style="margin:12px 0;padding:16px;border:1px solid rgba(0,0,0,.1);border-radius:14px">
+        <div>${tag(C[t.category] || t.category, t.category === 'safety' ? 'red' : '')} <b class="click" data-user="${esc(t.user_id)}">${esc(t.name)}</b>
+          <span class="meta">${esc(t.age || '')}세 · ${esc(t.region || '')} · ${fmt(t.created_at)}</span> ${t.status === 'open' ? tag('대기', 'red') : tag('답변 완료')}</div>
+        <p style="white-space:pre-wrap;margin:10px 0">${esc(t.body)}</p>
+        ${t.reply ? `<p class="meta" style="white-space:pre-wrap">↳ ${esc(t.reply)} (${fmt(t.replied_at)})</p>` : ''}
+        <div class="presets">${(SUPPORT_PRESETS[t.category] || []).concat(SUPPORT_PRESETS.common).map((p) => `<button type="button" class="btn sm" data-preset>${esc(p)}</button>`).join(' ')}</div>
+        <textarea rows="3" style="width:100%;box-sizing:border-box" placeholder="답변 쓰기 (회원에게 그대로 보여요)">${t.reply ? esc(t.reply) : ''}</textarea>
+        <div class="bar"><button class="btn sm primary" data-reply="0">${t.reply ? '답변 고치기' : '답변 보내기'}</button><button class="btn sm" data-reply="1">답변 보내고 닫기</button></div>
+      </div>`).join('') : `<div class="empty">${only === 'open' ? '답할 문의가 없어요.' : '문의가 없어요.'}</div>`}`;
+    main.querySelectorAll('[data-only]').forEach((el) => el.onclick = () => PAGES.support(main, el.dataset.only));
+    main.querySelectorAll('[data-user]').forEach((el) => el.onclick = () => openMember(el.dataset.user));
+    main.querySelectorAll('[data-preset]').forEach((b) => b.onclick = () => { b.closest('[data-id]').querySelector('textarea').value = b.textContent; });
+    main.querySelectorAll('[data-reply]').forEach((b) => b.onclick = () => run(b, async () => {
+      const card = b.closest('[data-id]'); const text = card.querySelector('textarea').value.trim();
+      if (text.length < 2) { toast('답변을 써 주세요.', true); return; }
+      await rpc('admin_reply_support', { p_id: +card.dataset.id, p_reply: text, p_close: b.dataset.reply === '1' });
+      toast('답변을 보냈어요. 회원에게 알림이 가요.'); await PAGES.support(main, only); refreshCounts();
+    }));
+  },
+
+  // 출시 이벤트 혜택
+  async perks(main) {
+    const [st, list] = await Promise.all([rpc('admin_perk_stats'), rpc('admin_perk_recent', { p_limit: 100 })]);
+    const K = { prereg: '사전 신청 선물', founding: '창립 회원', photo_gift: '실물 확인 선물', invite_sent: '친구 초대(초대한 분)', invite_joined: '친구 초대(가입한 분)' };
+    const what = (d) => d.plan ? `${esc(d.plan)} ${esc(d.days)}일` : d.credits ? `편지권 ${esc(d.credits)}장` : '';
+    main.innerHTML = `<h1>혜택</h1><p class="sub">웹사이트 '먼저 오신 분께 먼저 드려요'에서 약속한 출시 이벤트예요. 같은 휴대폰 번호로는 한 번만 지급돼요. 숫자·켜고 끄기는 DB private.settings 에서 바꿔요.</p>
+      <div class="grid stats">
+        <div class="stat"><div class="k">창립 회원</div><div class="v">${st.founding} / ${st.founding_cap}</div><div class="meta">남은 자리 ${Math.max(0, st.founding_cap - st.founding)}</div></div>
+        <div class="stat"><div class="k">사전 신청 선물</div><div class="v">${st.prereg}</div><div class="meta">플러스 무료</div></div>
+        <div class="stat"><div class="k">실물 확인 선물</div><div class="v">${st.photo_gift}</div><div class="meta">편지권 지급</div></div>
+        <div class="stat"><div class="k">친구 초대</div><div class="v">${st.invites_rewarded} / ${st.invites}</div><div class="meta">완료 / 코드 입력</div></div>
+        <div class="stat ${st.open ? '' : 'hot'}"><div class="k">지급 상태</div><div class="v">${st.open ? '지급 중' : '중지'}</div></div>
+      </div>
+      <h2>최근 지급</h2>
+      ${list.length ? `<div class="tbl"><table><thead><tr><th>시각</th><th>종류</th><th>회원</th><th>지역</th><th>내용</th></tr></thead><tbody>
+      ${list.map((x) => `<tr><td class="meta">${fmt(x.at)}</td><td>${esc(K[x.kind] || x.title)}${x.kind === 'founding' && x.detail.no ? ` ${esc(x.detail.no)}번` : ''}</td>
+        <td>${esc(x.name)}</td><td>${esc(x.region || '')}</td><td>${what(x.detail)}</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">아직 지급한 혜택이 없어요.</div>'}`;
+  },
+
+  // 출시 알림 신청 (웹사이트)
+  async prereg(main) {
+    const d = await rpc('admin_preregs', { p_limit: 2000 });
+    const max = Math.max(1, ...d.daily.map((x) => x.n));
+    const phone = (p) => p.replace(/^(\d{3})(\d{3,4})(\d{4})$/, '$1-$2-$3');
+    main.innerHTML = `<h1>출시 알림 신청</h1><p class="sub">웹사이트에서 신청한 분들이에요. 출시 안내 문자를 보낸 뒤 3개월 안에 지워야 해요.</p>
+      <div class="grid stats">
+        <div class="stat"><div class="k">전체 신청</div><div class="v">${d.total}</div></div>
+        <div class="stat"><div class="k">오늘</div><div class="v">${d.today}</div></div>
+        <div class="stat"><div class="k">여성 · 남성</div><div class="v">${d.gender['여성'] || 0} · ${d.gender['남성'] || 0}</div></div>
+        <div class="stat"><div class="k">혜택 소식 동의</div><div class="v">${d.marketing}</div></div>
+      </div>
+      <h2>최근 14일</h2>
+      <div class="panel"><div class="spark">${d.daily.map((x) => `<div style="height:${Math.max(2, x.n / max * 100)}%" data-t="${fmt(x.day, false)} ${x.n}명"></div>`).join('')}</div>
+        <div class="spark-x"><span>${fmt(d.daily[0].day, false)}</span><span>오늘</span></div></div>
+      <h2>지역 · 나이대</h2>
+      <p class="meta">${d.region.map((r) => `${esc(r.region)} ${r.n}`).join(' · ') || '아직 없어요'}<br>${Object.entries(d.age).map(([k, n]) => `${esc(k)} ${n}`).join(' · ')}</p>
+      <div class="bar"><button class="btn" id="pcsv">엑셀용 CSV 받기</button></div>
+      ${d.list.length ? `<div class="tbl"><table><thead><tr><th>신청</th><th>성함</th><th>번호</th><th>나이대</th><th>지역</th><th>성별</th><th>혜택</th><th>유입</th><th></th></tr></thead><tbody>
+      ${d.list.map((r) => `<tr data-id="${r.id}"><td>${fmt(r.created_at)}</td><td>${esc(r.name)}</td><td>${esc(phone(r.phone))}</td><td>${esc(r.age_band)}</td>
+        <td>${esc(r.region)}</td><td>${esc(r.gender)}</td><td>${r.marketing ? tag('동의', 'green') : ''}</td><td class="meta">${esc(r.source || '')}</td>
+        <td><button class="btn sm" data-del>삭제</button></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">아직 신청이 없어요.</div>'}`;
+    main.querySelectorAll('[data-del]').forEach((b) => b.onclick = () => run(b, async () => {
+      const tr = b.closest('tr'); if (!confirm('이 신청을 지울까요? (삭제 요청을 받은 경우)')) return;
+      await rpc('admin_delete_prereg', { p_id: +tr.dataset.id }); tr.remove(); toast('지웠어요.');
+    }));
+    $('#pcsv').onclick = () => {
+      const rows = [['신청일시', '성함', '번호', '나이대', '지역', '성별', '혜택동의', '유입'],
+        ...d.list.map((r) => [new Date(r.created_at).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }), r.name, phone(r.phone), r.age_band, r.region, r.gender, r.marketing ? 'Y' : 'N', r.source || ''])];
+      const csv = '﻿' + rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+      a.download = `두번째봄-출시알림-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+    };
+  },
+
+  // 회원 찾기
+  async members(main, q = '', status = '') {
+    main.innerHTML = `<h1>회원 찾기</h1><p class="sub">실명 일부나 회원 번호 앞자리로 찾아요. 실명은 운영 화면에서만 보여요.</p>
+      <form class="bar" id="mf"><input class="grow" type="search" id="mq" placeholder="예: 김정" value="${esc(q)}">
+        <select id="ms" style="width:auto"><option value="">모든 상태</option>${Object.entries(L.status).map(([k, l]) => `<option value="${k}" ${k === status ? 'selected' : ''}>${l}</option>`).join('')}</select>
+        <button class="btn primary">찾기</button></form><div id="mres"><p class="meta">불러오는 중…</p></div>`;
+    $('#mf').onsubmit = (e) => { e.preventDefault(); PAGES.members(main, $('#mq').value, $('#ms').value); };
+    const list = await rpc('admin_members', { p_q: q || null, p_status: status || null, p_limit: 100 });
+    $('#mres').innerHTML = list.length ? `<div class="tbl"><table><thead><tr><th>이름</th><th>성별·나이</th><th>지역</th><th>상태</th><th>가입</th><th>최근</th></tr></thead><tbody>
+      ${list.map((u) => `<tr class="click" data-id="${esc(u.id)}"><td><b>${esc(u.real_name)}</b> <span class="meta">${esc(u.display_name)}</span></td><td>${esc(L.gender[u.gender])} ${esc(u.age)}</td>
+        <td>${esc(u.region)}</td><td>${tag(L.status[u.status], L.statusTag[u.status])}</td><td>${fmt(u.created_at, false)}</td><td class="meta">${ago(u.last_active_at)}</td></tr>`).join('')}</tbody></table></div>`
+      : '<div class="empty">찾는 회원이 없어요.</div>';
+    $('#mres').querySelectorAll('tr[data-id]').forEach((tr) => tr.onclick = () => openMember(tr.dataset.id));
+  },
+};
+
+// 서류 한 건
+function docItem(v) {
+  const kind = v.kind;
+  const presets = (REJECT_PRESETS[kind] || []).map((p) => `<button type="button" data-p="${esc(p)}">${esc(p.length > 26 ? p.slice(0, 26) + '…' : p)}</button>`).join('');
+  return `<div class="item" data-id="${esc(v.id)}">
+    <div class="row">${who(v.user)}<div class="actions">${tag(L.kind[kind] || kind, 'wine')} <span class="meta">${ago(v.submitted_at)} 제출</span></div></div>
+    ${v.detail && v.detail.match_score != null ? `<div class="meta">셀카 대조 점수 ${Math.round(v.detail.match_score * 100)}% — 90% 미만이라 사람이 확인해요.</div>` : ''}
+    <div class="row">
+      ${v.has_document ? `<button class="btn" data-open="1">서류 열기${v.opened ? ' (열람함)' : ''}</button>` : '<span class="meta">올린 파일 없음</span>'}
+      ${kind === 'income' ? `<select data-band style="width:auto"><option value="">소득 구간 선택</option>${INCOME_BANDS.map((b) => `<option>${b}</option>`).join('')}</select>` : ''}
+      <div class="actions"><button class="btn ok" data-ok="1">승인</button><button class="btn bad" data-rej="1">반려…</button></div>
+    </div>
+    <div class="decide hidden" data-rejbox>
+      <textarea placeholder="반려 사유 (회원에게 그대로 전달돼요)"></textarea>
+      <div class="presets">${presets}</div>
+      <div class="row"><button class="btn danger" data-ok="0">반려 보내기</button></div>
+    </div></div>`;
+}
+function bindDoc(main, v) {
+  const item = main.querySelector(`.item[data-id="${v.id}"]`); if (!item) return;
+  const open = item.querySelector('[data-open]');
+  if (open) open.onclick = () => run(open, async () => {
+    const path = await rpc('admin_open_document', { p_verification: v.id });
+    const { data, error } = await sb.storage.from('verification-docs').createSignedUrl(path, 120);
+    if (error) throw error;
+    openViewer(data.signedUrl, /\.pdf$/i.test(path), '2분 동안만 열려요 · 저장·캡처하지 마세요');
+    open.textContent = '서류 열기 (열람함)';
+  });
+  item.querySelector('[data-rej]').onclick = () => item.querySelector('[data-rejbox]').classList.toggle('hidden');
+  item.querySelectorAll('.presets button').forEach((b) => b.onclick = () => { item.querySelector('textarea').value = b.dataset.p; });
+  item.querySelectorAll('[data-ok]').forEach((b) => b.onclick = () => run(b, async () => {
+    const approve = b.dataset.ok === '1';
+    const args = { p_verification: v.id, p_approve: approve, p_reason: null, p_detail: null };
+    if (approve && v.kind === 'income') {
+      const band = item.querySelector('[data-band]').value;
+      if (!band) throw new Error('소득 구간을 골라 주세요. 회원 프로필에는 금액 대신 이 구간만 보여요.');
+      args.p_detail = { ...(v.detail || {}), income_band: band };
+    }
+    if (!approve) { args.p_reason = item.querySelector('textarea').value.trim(); if (!args.p_reason) throw new Error('REASON_REQUIRED'); }
+    await rpc('admin_decide_verification', args);
+    item.innerHTML = `<div class="row">${who(v.user)}<div class="actions">${tag(L.kind[v.kind], 'wine')} ${approve ? tag('승인함 · 서류 삭제', 'green') : tag('반려함 · 서류 삭제', 'red')}</div></div>`;
+    hydratePhotos(item); refreshCounts();
+  }));
+}
+
+// 검토 건 상세
+async function openCase(id) {
+  let d;
+  try { d = await rpc('admin_case_detail', { p_case: id }); } catch (e) { return toast(msg(e), true); }
+  const c = d.case, u = d.target;
+  const sig = d.signals.map((s) => {
+    let body = '';
+    if (s.message) {
+      const ctx = s.message.context || [];
+      body = `<div class="chat">${ctx.map((x) => `<div class="bubble ${x.mine ? 'mine' : 'other'} ${x.id === s.message.id ? 'hit' : ''}">${esc(x.body)}<span class="t">${x.mine ? esc(u.real_name) : '상대'} · ${fmt(x.created_at)}</span></div>`).join('')}</div>`;
+    }
+    if (s.report) body = `<div class="kv"><dt>신고한 분</dt><dd>${esc(s.report.reporter?.real_name)} <span class="meta">${esc(s.report.reporter?.age)}세</span></dd><dt>사유</dt><dd>${esc(L.report[s.report.reason] || s.report.reason)}</dd></div>${s.report.detail ? `<div class="quote">${esc(s.report.detail)}</div>` : ''}`;
+    if (s.review) body = `<div class="kv"><dt>후기 쓴 분</dt><dd>${esc(s.review.reviewer?.real_name)}</dd><dt>문제</dt><dd>${(s.review.issues || []).map((i) => tag(L.issue[i] || i, 'amber')).join(' ')}</dd><dt>또 만나고 싶은지</dt><dd>${esc(L.want[s.review.want_again])}</dd></div>${s.review.detail ? `<div class="quote">${esc(s.review.detail)}</div>` : ''}`;
+    return `<div class="signal ${s.source}"><div>${tag(L.source[s.source], s.source === 'ai' ? 'amber' : 'wine')} <b>${esc(s.reason)}</b> <span class="meta">${fmt(s.created_at)}</span></div>${body}</div>`;
+  }).join('');
+  const acts = d.actions.map((a) => `<div class="panel"><div>${tag(L.action[a.action], a.action === 'restore' || a.action === 'no_issue' ? 'green' : 'red')} <span class="meta">${fmt(a.created_at)}</span></div>
+    <div class="kv" style="margin-top:8px"><dt>내부 메모</dt><dd>${esc(a.note)}</dd>${a.user_notice ? `<dt>회원 안내</dt><dd>${esc(a.user_notice)}</dd>` : ''}
+    ${a.appeal ? `<dt>이의신청</dt><dd>${tag(L.review[a.appeal.status])} ${esc(a.appeal.body)}</dd>` : ''}</div></div>`).join('');
+  const open = c.status === 'pending' || c.status === 'reviewing';
+  const suspended = u.status === 'suspended' || u.status === 'banned';
+  openDrawer(`
+    <h1>검토 건</h1><p class="sub">${tag(L.case[c.status], L.caseTag[c.status])} · 열린 날 ${fmt(c.opened_at)}</p>
+    <div class="panel">${who(u)}
+      <dl class="kv" style="margin-top:12px"><dt>받은 신고</dt><dd>${u.reports_received}건</dd><dt>매칭</dt><dd>${u.matches}번</dd>
+      <dt>직업</dt><dd>${esc(u.job_title || '-')}</dd><dt>소개</dt><dd>${esc(u.bio || '-')}</dd>
+      <dt>이전 검토</dt><dd>${d.past_cases.length ? d.past_cases.map((p) => tag(L.case[p.status], L.caseTag[p.status]) + ' <span class="meta">' + fmt(p.opened_at, false) + '</span>').join(' ') : '없음'}</dd></dl>
+      <div style="margin-top:10px"><button class="btn sm" id="toMember">회원 정보 전체 보기</button></div></div>
+    <h2>근거 ${d.signals.length}개</h2><div class="list">${sig || '<div class="empty">근거가 없어요.</div>'}</div>
+    <h2>조치</h2>
+    <div class="panel decide" id="actBox">
+      <div class="seg" id="actSeg">
+        ${(open ? ['no_issue', 'warn', 'suspend', 'ban'] : []).concat(suspended ? ['restore'] : []).concat(!open && !suspended ? ['warn', 'suspend', 'ban'] : [])
+          .map((k) => `<button type="button" data-a="${k}" class="${k === 'suspend' || k === 'ban' ? 'dz' : ''}">${L.action[k]}</button>`).join('')}
+      </div>
+      <label class="f">판단 근거 (내부 기록 · 필수)<textarea id="actNote" placeholder="예: 3번 메시지에서 코인 투자 권유 + 계좌 송금 요구 확인"></textarea></label>
+      <label class="f hidden" id="noticeWrap">회원에게 보낼 사유 (그대로 전달돼요 · 필수)<textarea id="actNotice"></textarea><div class="presets" id="noticePresets"></div></label>
+      <div class="hint" id="actHint">조치를 골라 주세요.</div>
+      <div class="row"><button class="btn primary" id="actGo" disabled>조치 저장</button></div>
+    </div>
+    ${acts ? `<h2>처리 이력</h2>${acts}` : ''}`);
+  $('#toMember').onclick = () => openMember(u.id);
+  let pick = null;
+  const hints = { no_issue: '건을 닫아요. 회원에게 알림은 가지 않아요.', warn: '회원에게 경고 알림이 가요. 이용은 그대로예요.',
+    suspend: '바로 이용이 멈춰요. 회원은 이의신청을 할 수 있어요.', ban: '이용이 영구히 막히고 모든 대화가 닫혀요. 회원은 이의신청을 할 수 있어요.',
+    restore: '정지를 풀고 다시 활동하게 해요.' };
+  $('#actSeg').querySelectorAll('button').forEach((b) => b.onclick = () => {
+    pick = b.dataset.a;
+    $('#actSeg').querySelectorAll('button').forEach((x) => x.className = x === b ? 'on' + (x.classList.contains('dz') ? ' danger' : '') : (x.classList.contains('dz') ? 'dz' : ''));
+    const needNotice = ['warn', 'suspend', 'ban'].includes(pick);
+    $('#noticeWrap').classList.toggle('hidden', !needNotice);
+    $('#noticePresets').innerHTML = (NOTICE_PRESETS[pick] || []).map((p) => `<button type="button">${esc(p)}</button>`).join('');
+    $('#noticePresets').querySelectorAll('button').forEach((x) => x.onclick = () => { $('#actNotice').value = x.textContent; });
+    $('#actHint').textContent = hints[pick]; $('#actGo').disabled = false;
+    $('#actGo').className = 'btn ' + (pick === 'suspend' || pick === 'ban' ? 'danger' : 'primary');
+    $('#actGo').textContent = L.action[pick] + ' 저장';
+  });
+  $('#actGo').onclick = () => run($('#actGo'), async () => {
+    const note = $('#actNote').value.trim(), notice = $('#actNotice').value.trim();
+    if (note.length < 2) throw new Error('판단 근거를 두 글자 이상 적어 주세요.');
+    if (['warn', 'suspend', 'ban'].includes(pick) && !notice) throw new Error('NOTICE_REQUIRED');
+    if (pick === 'ban' && !confirmBan()) return;
+    await rpc('admin_act', { p_case: c.id, p_action: pick, p_note: note, p_user_notice: notice || null });
+    toast(L.action[pick] + ' 처리했어요'); refreshCounts(); openCase(c.id);
+    if (current === 'cases') PAGES.cases($('#main'));
+  });
+}
+// 영구 정지는 한 번 더 확인 (브라우저 확인창 대신 버튼 두 번 누르기)
+let banArmed = 0;
+function confirmBan() {
+  if (Date.now() - banArmed < 5000) { banArmed = 0; return true; }
+  banArmed = Date.now(); $('#actGo').textContent = '정말 영구 정지할까요? 한 번 더 누르세요'; return false;
+}
+
+// 회원 상세
+const REGIONS = [['서울','강동구','서울 강동',37.5301,127.1238],['서울','송파구','서울 송파',37.5146,127.1059],['서울','강남구','서울 강남',37.5172,127.0473],
+  ['서울','서초구','서울 서초',37.4837,127.0324],['서울','광진구','서울 광진',37.5385,127.0823],['서울','성동구','서울 성동',37.5634,127.0369],
+  ['서울','동작구','서울 동작',37.5124,126.9393],['서울','관악구','서울 관악',37.4784,126.9516],['경기','성남시 분당구','성남 분당',37.3827,127.1189],
+  ['경기','성남시 수정구','성남 수정',37.4504,127.1456],['경기','성남시 중원구','성남 중원',37.4305,127.1371],['경기','하남시','경기 하남',37.5393,127.2148],
+  ['경기','용인시 수지구','용인 수지',37.3223,127.0977],['경기','용인시 기흥구','용인 기흥',37.2803,127.1146],['경기','과천시','경기 과천',37.4292,126.9876],
+  ['경기','광주시','경기 광주',37.4294,127.2551]];   // 앱 lib/regions.ts 와 같게 유지
+async function openMember(id) {
+  let d;
+  try { d = await rpc('admin_member_detail', { p_user: id }); } catch (e) { return toast(msg(e), true); }
+  const u = d.user, n = d.counts;
+  openDrawer(`
+    <h1>${esc(u.real_name)}</h1><p class="sub">${esc(u.display_name)} · ${esc(L.gender[u.gender])} · ${esc(u.birth_date)} (${esc(u.age)}세) · ${esc(u.region)}</p>
+    <div class="panel"><dl class="kv">
+      <dt>상태</dt><dd>${tag(L.status[u.status], L.statusTag[u.status])} ${u.is_hidden ? tag('프로필 숨김') : ''}</dd>
+      <dt>찾는 분</dt><dd>${esc(L.gender[u.seeking])} ${esc(u.age_min)}~${esc(u.age_max)}세</dd>
+      <dt>혼인</dt><dd>${esc(L.marital[u.marital] || '-')}</dd><dt>직업</dt><dd>${esc(u.job_title || '-')}</dd>
+      <dt>소개</dt><dd>${esc(u.bio || '-')}</dd>
+      <dt>요금제</dt><dd>${d.plan && d.plan.plan === 'plus' ? '플러스 · ' + fmt(d.plan.expires_at, false) + '까지' : '무료'}</dd>
+      <dt>활동</dt><dd>편지 보냄 ${n.letters_sent} · 받음 ${n.letters_received} · 매칭 ${n.matches}</dd>
+      <dt>신고</dt><dd>받음 ${n.reports_received} · 함 ${n.reports_made}</dd>
+      <dt>가입 · 최근</dt><dd>${fmt(u.created_at)} · ${ago(u.last_active_at)}</dd>
+      <dt>회원 번호</dt><dd class="meta">${esc(u.id)}</dd></dl></div>
+    <h2>사진</h2><div class="photos">${d.photos.length ? d.photos.map((p) => `<div class="photo"><span class="pos">${p.position === 8 ? '그 시절' : p.position + 1}</span><img data-path="${esc(p.path)}" alt=""><div class="meta">${esc(L.review[p.review])}</div></div>`).join('') : '<span class="meta">없음</span>'}</div>
+    <h2>인증</h2>${d.verifications.length ? `<div class="tbl"><table><thead><tr><th>항목</th><th>상태</th><th>확인한 달</th><th>메모</th></tr></thead><tbody>
+      ${d.verifications.map((v) => `<tr><td>${esc(L.kind[v.kind])}</td><td>${tag(L.review[v.status], v.status === 'approved' ? 'green' : v.status === 'rejected' ? 'red' : 'amber')}</td>
+        <td>${v.verified_month ? esc(v.verified_month.slice(0, 7).replace('-', '.')) : '-'}</td>
+        <td class="meta">${esc(v.reject_reason || v.detail?.income_band || (v.detail?.match_score != null ? '대조 ' + Math.round(v.detail.match_score * 100) + '%' : ''))}</td></tr>`).join('')}</tbody></table></div>` : '<p class="meta">없음</p>'}
+    <h2>검토 건</h2>${d.cases.length ? `<div class="list">${d.cases.map((c) => `<button class="btn" style="text-align:left" data-case="${esc(c.id)}">${tag(L.case[c.status], L.caseTag[c.status])} ${fmt(c.opened_at)}</button>`).join('')}</div>` : '<p class="meta">없음</p>'}
+    <h2>사는 지역 바꾸기</h2>
+    <div class="panel decide"><p class="meta">회원이 문의하기로 요청했을 때만 바꿔 주세요. 바꾸면 회원에게 알림이 가요.</p>
+      <div class="row"><select id="rgSel">${REGIONS.map((r, i) => `<option value="${i}" ${r[2] === u.region ? 'selected' : ''}>${esc(r[2])}</option>`).join('')}</select>
+      <button class="btn" id="rgGo">지역 바꾸기</button></div></div>
+    <h2>검토 건 직접 열기</h2>
+    <div class="panel decide"><textarea id="ocReason" placeholder="예: 고객센터 전화 제보 — 카카오톡으로 옮기자며 돈을 빌려 달라고 함"></textarea>
+      <div class="row"><button class="btn primary" id="ocGo">검토 건 열기</button></div></div>`);
+  $('#drawer').querySelectorAll('[data-case]').forEach((b) => b.onclick = () => openCase(b.dataset.case));
+  $('#rgGo').onclick = () => run($('#rgGo'), async () => {
+    const r = REGIONS[+$('#rgSel').value];
+    if (r[2] === u.region) { toast('지금과 같은 지역이에요.', true); return; }
+    await rpc('admin_set_region', { p_user: u.id, p_sido: r[0], p_sigungu: r[1], p_label: r[2], p_lat: r[3], p_lng: r[4] });
+    toast(r[2] + '(으)로 바꿨어요. 회원에게 알림이 가요.'); openMember(u.id);
+  });
+  $('#ocGo').onclick = () => run($('#ocGo'), async () => {
+    const cid = await rpc('admin_open_case', { p_user: u.id, p_reason: $('#ocReason').value });
+    toast('검토 건을 열었어요'); refreshCounts(); openCase(cid);
+  });
+}
+
+// ── 로그인 ─────────────────────────────────────────────────
+async function enter() {
+  try {
+    const me = await rpc('admin_me');
+    const { data } = await sb.auth.getUser();
+    $('#meName').textContent = (data.user?.email || '') + ' · ' + ({ owner: '대표', moderator: '운영', reviewer: '검수' }[me.role] || me.role);
+    $('#login').classList.add('hidden'); $('#app').classList.remove('hidden');
+    const v = location.hash.slice(1);
+    go(VIEWS.some((x) => x.key === v) ? v : 'home');
+    clearInterval(enter.t); enter.t = setInterval(refreshCounts, 60000);
+  } catch (e) {
+    await sb.auth.signOut();
+    showLogin(msg(e));
+  }
+}
+function showLogin(err = '') {
+  $('#app').classList.add('hidden'); $('#login').classList.remove('hidden'); $('#loginErr').textContent = err;
+}
+$('#loginForm').onsubmit = (e) => {
+  e.preventDefault();
+  run($('#loginBtn'), async () => {
+    $('#loginErr').textContent = '';
+    const { error } = await sb.auth.signInWithPassword({ email: $('#email').value.trim(), password: $('#pw').value });
+    if (error) { $('#loginErr').textContent = msg(error); return; }
+    await enter();
+  });
+};
+$('#outBtn').onclick = async () => { await sb.auth.signOut(); showLogin(); };
+$('#pwBtn').onclick = () => {
+  openDrawer(`<h1>비밀번호 바꾸기</h1><p class="sub">12자 이상, 다른 곳에서 쓰지 않는 비밀번호로 정해 주세요.</p>
+    <div class="panel decide"><label class="f">새 비밀번호<input type="password" id="np1" autocomplete="new-password"></label>
+    <label class="f">한 번 더<input type="password" id="np2" autocomplete="new-password"></label>
+    <div class="row"><button class="btn primary" id="npGo">바꾸기</button></div></div>`);
+  $('#npGo').onclick = () => run($('#npGo'), async () => {
+    const a = $('#np1').value, b = $('#np2').value;
+    if (a.length < 12) throw new Error('12자 이상으로 정해 주세요.');
+    if (a !== b) throw new Error('두 비밀번호가 달라요.');
+    const { error } = await sb.auth.updateUser({ password: a }); if (error) throw error;
+    toast('비밀번호를 바꿨어요'); closeDrawer();
+  });
+};
+
+(async () => {
+  const { data } = await sb.auth.getSession();
+  if (data.session) enter(); else showLogin();
+})();
+</script>
+</body>
+</html>
