@@ -11,9 +11,9 @@
 <title>두번째봄</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
-@font-face { font-family: "SUIT"; font-weight: 400; src: url("894f2aa0ee98.woff2") format("woff2"); font-display: swap; }
-@font-face { font-family: "SUIT"; font-weight: 700; src: url("3ab794e35b74.woff2") format("woff2"); font-display: swap; }
-@font-face { font-family: "SUIT"; font-weight: 900; src: url("c80b173dc32e.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "SUIT"; font-weight: 400; src: url("c8832dc57446.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "SUIT"; font-weight: 700; src: url("10510d57b255.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "SUIT"; font-weight: 900; src: url("780c0f9a1de0.woff2") format("woff2"); font-display: swap; }
 /* Layout: 사진 모자이크 위 큰 한 줄(히어로) → 흰 바탕 큰 숫자 → 검증 카드 → 검은 띠 하루 흐름 → 취향 사진 → 안전 대화 → 질문 → 그라데이션 신청 → 검은 푸터 */
 :root {
   --black: #0F0B0C; --black-2: #1A1416; --white: #FFFFFF; --paper: #F7F2EF; --ink: #1E1719;
@@ -1091,7 +1091,7 @@ html.big body > :not(nav):not(script) { zoom: 1.15; }
       </div>
       <div class="ecta rv">
         <a class="cta" href="#prereg">출시 알림 신청하고 혜택 받기</a>
-        <p class="enote">사전 신청하신 분은 첫 달 플러스 무료 · 이벤트 내용은 출시 때 앱 공지로 확정돼요</p>
+        <p class="enote">사전 신청하신 분은 플러스 30일 선물 · 이벤트 내용은 출시 때 앱 공지로 확정돼요</p>
       </div>
     </div>
   </section>
@@ -1103,7 +1103,7 @@ html.big body > :not(nav):not(script) { zoom: 1.15; }
         <p class="lede rv s2" style="margin-top:22px">사전 신청하신 분께<br>출시하는 날 문자로 가장 먼저 알려 드려요</p>
         <ul class="perks rv s3">
           <li>출시 당일 문자 안내</li>
-          <li>사전 신청자 첫 달 플러스 무료</li>
+          <li>사전 신청하면 플러스 30일 선물</li>
           <li>사는 지역 출시 순서 우선 반영</li>
         </ul>
         <div class="wait rv s4" id="wait" hidden>
@@ -1118,31 +1118,30 @@ html.big body > :not(nav):not(script) { zoom: 1.15; }
       <form class="pform rv s2" id="pform" name="prereg" novalidate>
         <h3>출시 알림 신청</h3>
         <p class="hp"><label>회사 <input name="company" id="company" tabindex="-1" autocomplete="off"></label></p>
-        <div class="row2">
-          <label class="f"><span>성함 또는 호칭</span><input id="pname" name="name" maxlength="20" required placeholder="예: 김정수"></label>
-          <label class="f"><span>휴대폰 번호</span><input id="pphone" name="phone" inputmode="tel" maxlength="13" required placeholder="010-0000-0000"></label>
-        </div>
+        <label class="f"><span>휴대폰 번호</span><input id="pphone" name="phone" inputmode="tel" maxlength="13" required placeholder="010-0000-0000"></label>
         <div class="row2">
           <label class="f"><span>나이대</span>
             <select id="page" name="age" required><option value="">선택</option><option>43~49세</option><option>50대</option><option>60~65세</option></select></label>
-          <label class="f"><span>사는 곳</span>
-            <select id="pregion" name="region" required><option value="">선택</option>
+          <label class="f"><span>사는 곳 <small>(선택)</small></span>
+            <select id="pregion" name="region"><option value="">선택</option>
               <option>서울</option><option>경기</option><option>인천</option><option>강원</option><option>충청</option><option>대전·세종</option><option>전라</option><option>광주</option><option>경상</option><option>대구</option><option>부산·울산</option><option>제주</option></select></label>
         </div>
         <fieldset class="f seg"><legend>성별</legend>
           <label><input type="radio" name="gender" value="여성" id="pg-f" required> 여성</label>
           <label><input type="radio" name="gender" value="남성" id="pg-m"> 남성</label>
         </fieldset>
+        <label class="f"><span>성함 또는 호칭 <small>(선택)</small></span><input id="pname" name="name" maxlength="20" placeholder="예: 김정수"></label>
         <label class="agree"><input type="checkbox" id="pagree" name="agree_privacy" value="동의" required>
           <span><b>[필수]</b> 개인정보 수집·이용에 동의합니다. <button type="button" class="link" id="pshow">내용 보기</button> · <a href="privacy.html" class="link">처리방침</a></span></label>
         <div class="terms" id="pterms" hidden>
-          수집 항목: 성함(호칭), 휴대폰 번호, 나이대, 성별, 사는 곳<br>
+          수집 항목: 휴대폰 번호, 나이대, 성별 (선택: 성함·호칭, 사는 곳)<br>
           이용 목적: 두번째봄 출시 안내 문자 발송, 지역별 출시 순서 결정<br>
           보유 기간: 출시 안내 후 3개월 이내 파기 (동의 철회 시 즉시 파기)<br>
           동의하지 않으셔도 되지만, 이 경우 사전 신청이 되지 않아요.
         </div>
         <label class="agree"><input type="checkbox" id="pmkt" name="agree_marketing" value="동의">
           <span>[선택] 출시 후 이벤트·혜택 소식도 받을게요.</span></label>
+        <p class="psafe">여성분들도 안심하세요 · 번호는 출시 문자에만 쓰고, 다른 회원에게 절대 보이지 않아요</p>
         <button class="cta" type="submit" id="psubmit">사전 신청하기</button>
         <p class="pmsg" id="pmsg" role="status" aria-live="polite"></p>
         <button type="button" class="pshare" id="pshare" hidden>친구에게 알리기</button>
@@ -1168,13 +1167,50 @@ html.big body > :not(nav):not(script) { zoom: 1.15; }
   </div>
 </footer>
 
+<a class="sticky-cta" id="stickyCta" href="#prereg" aria-label="출시 알림 신청으로 이동"><span>출시 알림 신청하면 <b>플러스 30일 선물</b></span><i>신청하기</i></a>
+<style>
+.psafe{margin:4px 0 12px;font-size:15px;line-height:1.5;color:#7a4b5a;background:#fff3f5;border-radius:12px;padding:10px 12px}
+.sticky-cta{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 12px 12px 18px;border-radius:999px;background:linear-gradient(90deg,#e0325f,#f2894a);color:#fff;text-decoration:none;font-size:16px;box-shadow:0 10px 30px rgba(120,20,50,.35);transform:translateY(140%);transition:transform .35s ease}
+.sticky-cta b{font-weight:900}.sticky-cta i{font-style:normal;font-weight:800;background:#fff;color:#d42a58;border-radius:999px;padding:9px 16px;white-space:nowrap}
+.sticky-cta.on{transform:none}
+@media (min-width:900px){.sticky-cta{left:auto;right:24px;width:420px}}
+@media (prefers-reduced-motion:reduce){.sticky-cta{transition:none}}
+</style>
+<script>
+(() => {
+  const bar = document.getElementById('stickyCta'), hero = document.getElementById('top'), form = document.getElementById('prereg');
+  let pastHero = false, formIn = false;
+  const upd = () => bar.classList.toggle('on', pastHero && !formIn);
+  try {
+    new IntersectionObserver(([e]) => { pastHero = !e.isIntersecting; upd(); }).observe(hero);
+    new IntersectionObserver(([e]) => { formIn = e.isIntersecting; upd(); }, { rootMargin: '0px 0px -20% 0px' }).observe(form);
+  } catch (e) {}
+})();
+</script>
 <script>
 (() => {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const PUBLIC = true;
   const SB_URL = 'https://qkuwyenlyvzyyfaybyec.supabase.co';
   const SB_KEY = 'sb_publishable_WVU3NyHcfenbmL1cGYHMzA_nZG7mJSK';  // 공개용 키 (출시 알림 저장만 가능)
-  const MODELS = ["8b8523635e21.webp", "395a0ab70f20.webp"];   // 모델 사진(여성, 가상 인물) — 들어오면 모자이크 앞쪽에 우선 배치
+  const MODELS = ["8b8523635e21.webp", "395a0ab70f20.webp"];
+  /* ---------- 방문·신청 흐름 숫자 (개인정보 없이 이벤트 이름만) ---------- */
+  const QS = new URLSearchParams(location.search);
+  const SRC = (QS.get('utm_source') || QS.get('src') || (document.referrer ? (()=>{try{return new URL(document.referrer).hostname}catch(e){return ''}})() : 'direct')).replace(/[^a-zA-Z0-9_\-.]/g,'').replace(/\./g,'_').slice(0, 40);
+  const sent = {};
+  const track = (ev) => { if (sent[ev]) return; sent[ev] = 1; try { fetch(`${SB_URL}/rest/v1/rpc/log_site_event`, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json', apikey: SB_KEY }, body: JSON.stringify({ p_ev: ev, p_src: SRC }) }).catch(() => {}); } catch (e) {} };
+  track('visit');
+  addEventListener('DOMContentLoaded', () => {
+    const pf = document.getElementById('pform');
+    if (pf) {
+      try { new IntersectionObserver((es, o) => { if (es.some((e) => e.isIntersecting)) { track('form_view'); o.disconnect(); } }, { threshold: 0.3 }).observe(pf); } catch (e) {}
+      pf.addEventListener('focusin', () => track('form_start'), { once: true });
+    }
+    document.querySelectorAll('a[href*="sub_confirmation"]').forEach((a) => a.addEventListener('click', () => track('sub_click')));
+    document.querySelectorAll('a[href*="list=PLJCU"]').forEach((a) => a.addEventListener('click', () => track('playlist_click')));
+    // 유튜브에서 들어온 분은 신청 칸으로 바로
+    if (/youtube|youtu_be|^yt/i.test(SRC) && !location.hash) setTimeout(() => document.getElementById('prereg')?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' }), 900);
+  });   // 모델 사진(여성, 가상 인물) — 들어오면 모자이크 앞쪽에 우선 배치
 
   /* ---------- 히어로 모자이크 ---------- */
   const cat = ['walk', 'travel', 'music', 'food', 'sport', 'art', 'life'].map((k) => `var(--photo-${k})`);
@@ -1288,10 +1324,10 @@ html.big body > :not(nav):not(script) { zoom: 1.15; }
     msg.className = 'pmsg';
     const fd = new FormData(form);
     const digits = String(fd.get('phone') || '').replace(/\D/g, '');
-    if (!String(fd.get('name') || '').trim()) { msg.textContent = '성함 또는 호칭을 적어 주세요.'; return; }
     if (!/^01[016789]\d{7,8}$/.test(digits)) { msg.textContent = '휴대폰 번호를 다시 확인해 주세요.'; return; }
-    if (!fd.get('age') || !fd.get('region') || !fd.get('gender')) { msg.textContent = '나이대, 사는 곳, 성별을 골라 주세요.'; return; }
+    if (!fd.get('age') || !fd.get('gender')) { msg.textContent = '나이대와 성별을 골라 주세요.'; return; }
     if (!fd.get('agree_privacy')) { msg.textContent = '개인정보 수집·이용에 동의해 주셔야 신청돼요.'; return; }
+    track('submit_click');
     const btn = document.getElementById('psubmit'); btn.disabled = true; btn.textContent = '보내는 중…';
     if (fd.get('company')) { form.reset(); msg.className = 'pmsg ok'; msg.textContent = '신청이 완료됐어요.'; btn.disabled = false; btn.textContent = '사전 신청하기'; return; }
     const qs = new URLSearchParams(location.search);
@@ -1300,11 +1336,12 @@ html.big body > :not(nav):not(script) { zoom: 1.15; }
       // 서버(서울)에 바로 저장. 같은 번호로 다시 신청하면 내용만 고쳐져요.
       const res = await fetch(`${SB_URL}/rest/v1/rpc/submit_prereg`, {
         method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_KEY },
-        body: JSON.stringify({ p_name: String(fd.get('name')).trim(), p_phone: digits, p_age: fd.get('age'), p_region: fd.get('region'),
+        body: JSON.stringify({ p_name: String(fd.get('name') || '').trim(), p_phone: digits, p_age: fd.get('age'), p_region: fd.get('region') || '',
           p_gender: fd.get('gender'), p_marketing: !!fd.get('agree_marketing'), p_source: source || null }),
       });
       const out = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(out.message || String(res.status));
+      track('submit_ok');
       form.reset();
       msg.className = 'pmsg ok';
       msg.textContent = out.new === false ? '이미 신청하신 번호예요. 고친 내용으로 저장했어요.' : '신청이 완료됐어요. 출시하는 날 문자로 알려 드릴게요.';
