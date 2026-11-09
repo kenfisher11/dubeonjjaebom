@@ -1117,6 +1117,7 @@ html.big body > :not(nav):not(script) { zoom: 1.15; }
       </div>
       <form class="pform rv s2" id="pform" name="prereg" novalidate>
         <h3>출시 알림 신청</h3>
+        <p class="pkeep"><b>아는 사람에게 절대 안 보여요</b><br>신청만으로는 프로필이 만들어지지 않아요. 번호는 출시 문자에만 써요.</p>
         <p class="hp"><label>회사 <input name="company" id="company" tabindex="-1" autocomplete="off"></label></p>
         <label class="f"><span>휴대폰 번호</span><input id="pphone" name="phone" inputmode="tel" maxlength="13" required placeholder="010-0000-0000"></label>
         <div class="row2">
@@ -1141,7 +1142,7 @@ html.big body > :not(nav):not(script) { zoom: 1.15; }
         </div>
         <label class="agree"><input type="checkbox" id="pmkt" name="agree_marketing" value="동의">
           <span>[선택] 출시 후 이벤트·혜택 소식도 받을게요.</span></label>
-        <p class="psafe">여성분들도 안심하세요 · 번호는 출시 문자에만 쓰고, 다른 회원에게 절대 보이지 않아요</p>
+        <p class="psafe">여성분들도 안심하세요 · 출시 뒤에도 본인인증·실물 사진 대조를 마친 43~65세만 만나요</p>
         <button class="cta" type="submit" id="psubmit">사전 신청하기</button>
         <p class="pmsg" id="pmsg" role="status" aria-live="polite"></p>
         <button type="button" class="pshare" id="pshare" hidden>친구에게 알리기</button>
@@ -1169,6 +1170,7 @@ html.big body > :not(nav):not(script) { zoom: 1.15; }
 
 <a class="sticky-cta" id="stickyCta" href="#prereg" aria-label="출시 알림 신청으로 이동"><span>출시 알림 신청하면 <b>플러스 30일 선물</b></span><i>신청하기</i></a>
 <style>
+.pkeep{margin:0 0 14px;font-size:16px;line-height:1.5;color:#5a2a3a;background:#ffe9ee;border:1.5px solid #f4a9b8;border-radius:14px;padding:12px 14px}.pkeep b{font-size:18px;color:#c2185b}
 .psafe{margin:4px 0 12px;font-size:15px;line-height:1.5;color:#7a4b5a;background:#fff3f5;border-radius:12px;padding:10px 12px}
 .sticky-cta{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 12px 12px 18px;border-radius:999px;background:linear-gradient(90deg,#e0325f,#f2894a);color:#fff;text-decoration:none;font-size:16px;box-shadow:0 10px 30px rgba(120,20,50,.35);transform:translateY(140%);transition:transform .35s ease}
 .sticky-cta b{font-weight:900}.sticky-cta i{font-style:normal;font-weight:800;background:#fff;color:#d42a58;border-radius:999px;padding:9px 16px;white-space:nowrap}
